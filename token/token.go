@@ -31,4 +31,5 @@ const (
   // Keywords
   LET = "LET"
   FUNCTION = "FUNCTION"
+  RETURN = "RETURN"
 )
