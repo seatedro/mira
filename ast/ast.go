@@ -38,7 +38,7 @@ type LetStatement struct {
 
 type Identifier struct {
 	Token token.Token
-	Value Expression
+	Value string
 }
 
 func (ls *LetStatement) statementNode()       {}
