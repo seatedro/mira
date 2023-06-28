@@ -55,7 +55,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	return nil
 }
 
-func (p Parser) parseLetStatement() ast.Statement {
+func (p *Parser) parseLetStatement() ast.Statement {
 	stmnt := &ast.LetStatement{Token: p.currToken}
 
 	if !p.expectPeek(token.IDENTIFIER) {
@@ -85,10 +85,10 @@ func (p Parser) peekTokenIs(t token.TokenType) bool {
 	return p.peekToken.Type == t
 }
 
-func (p Parser) expectPeek(t token.TokenType) bool {
+func (p *Parser) expectPeek(t token.TokenType) bool {
 	if p.peekTokenIs(t) {
 		p.nextToken()
 		return true
 	}
-	return true
+	return false
 }
