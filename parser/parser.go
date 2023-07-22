@@ -7,6 +7,9 @@ import (
 	"mira/ast"
 	"mira/lexer"
 	"mira/token"
+	"strconv"
+)
+
 // INFO: Operator Precedences
 const (
 	_ int = iota
@@ -45,6 +48,8 @@ func New(l *lexer.Lexer) *Parser {
 
 	p.prefixParsers = make(map[token.TokenType]prefixParseFn)
 	p.prefixParsers[token.IDENTIFIER] = p.parseIdentifier
+	p.prefixParsers[token.INT] = p.parseIntegerLiteral
+
 	// Eg: let x = 5;
 	// Calling twice because initially currToken = nil, nextToken = let.
 	p.nextToken()
@@ -69,6 +74,23 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
+}
+
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+	literal := &ast.IntegerLiteral{Token: p.currToken}
+
+	value, err := strconv.ParseInt(p.currToken.Literal, 0, 64)
+
+	if err != nil {
+		errMsg := fmt.Sprintf("Could not parse %s as integer", p.currToken.Literal)
+		p.errors = append(p.errors, errMsg)
+
+		return nil
+	}
+
+	literal.Value = value
+
+	return literal
 }
 
 func (p *Parser) parseStatement() ast.Statement {
