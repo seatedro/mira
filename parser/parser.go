@@ -7,6 +7,16 @@ import (
 	"mira/ast"
 	"mira/lexer"
 	"mira/token"
+// INFO: Operator Precedences
+const (
+	_ int = iota
+	LOWEST
+	EQUALS
+	COMPARISON
+	SUM
+	PRODUCT
+	PREFIX
+	CALL
 )
 
 type Parser struct {
@@ -33,6 +43,8 @@ func (p *Parser) nextToken() {
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{l: l, errors: []string{}}
 
+	p.prefixParsers = make(map[token.TokenType]prefixParseFn)
+	p.prefixParsers[token.IDENTIFIER] = p.parseIdentifier
 	// Eg: let x = 5;
 	// Calling twice because initially currToken = nil, nextToken = let.
 	p.nextToken()
@@ -55,6 +67,10 @@ func (p *Parser) ParseProgram() *ast.Program {
 	return program
 }
 
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
+}
+
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.currToken.Type {
 	case token.LET:
@@ -62,9 +78,31 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	default:
-		break
+		return p.parseExpressionStatement()
 	}
-	return nil
+}
+
+func (p *Parser) parseExpressionStatement() ast.Statement {
+	stmnt := &ast.ExpressionStatement{Token: p.currToken}
+
+	stmnt.Expression = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmnt
+}
+
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+	prefix := p.prefixParsers[p.currToken.Type]
+	if prefix == nil {
+		return nil
+	}
+
+	leftExp := prefix()
+
+	return leftExp
 }
 
 func (p *Parser) parseLetStatement() ast.Statement {
