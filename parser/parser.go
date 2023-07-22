@@ -15,7 +15,15 @@ type Parser struct {
 	currToken token.Token
 	peekToken token.Token
 	errors    []string
+
+	prefixParsers map[token.TokenType]prefixParseFn
+	infixParsers  map[token.TokenType]infixParseFn
 }
+
+type (
+	prefixParseFn func() ast.Expression
+	infixParseFn  func(ast.Expression) ast.Expression
+)
 
 func (p *Parser) nextToken() {
 	p.currToken = p.peekToken
