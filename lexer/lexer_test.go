@@ -28,6 +28,10 @@ if (5 < 10) {
 
 10 == 10;
 10 != 9;
+10--;
+--10;
+10++;
+++10;
 `
 
 	tests := []struct {
@@ -107,6 +111,18 @@ if (5 < 10) {
 		{token.INT, "10"},
 		{token.NEQ, "!="},
 		{token.INT, "9"},
+		{token.SEMICOLON, ";"},
+		{token.INT, "10"},
+		{token.DEC, "--"},
+		{token.SEMICOLON, ";"},
+		{token.DEC, "--"},
+		{token.INT, "10"},
+		{token.SEMICOLON, ";"},
+		{token.INT, "10"},
+		{token.INC, "++"},
+		{token.SEMICOLON, ";"},
+		{token.INC, "++"},
+		{token.INT, "10"},
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
