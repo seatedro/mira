@@ -165,6 +165,71 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	}
 }
 
+func TestPrefixOperatorExpression(t *testing.T) {
+	prefixTests := []struct {
+		input        string
+		operator     string
+		integerValue int64
+	}{
+		{"!10;", "!", 10},
+		{"-5;", "-", 5},
+		{"--5;", "--", 5},
+		{"++5;", "++", 5},
+	}
+
+	for _, tt := range prefixTests {
+		lexer := lexer.New(tt.input)
+		parser := New(lexer)
+		program := parser.ParseProgram()
+		checkParserErrors(t, parser)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("Program doesn't have enough statements. Got: %d", len(program.Statements))
+		}
+
+		stmnt, ok := program.Statements[0].(*ast.ExpressionStatement)
+
+		if !ok {
+			t.Fatalf("Program.Statements[0] is not an ast.ExpressionStatement. Got: %T", program.Statements[0])
+		}
+
+		exp, ok := stmnt.Expression.(*ast.PrefixExpression)
+
+		if !ok {
+			t.Fatalf("exp not *ast.IntegerLiteral. got=%T", stmnt.Expression)
+		}
+
+		if exp.Operator != tt.operator {
+			t.Fatalf("Operator not %s, Got: %s", tt.operator, exp.Operator)
+		}
+
+		if !testIntegerLiteral(t, exp.Right, tt.integerValue) {
+			return
+		}
+	}
+}
+
+func testIntegerLiteral(t *testing.T, il ast.Expression, val int64) bool {
+	integer, ok := il.(*ast.IntegerLiteral)
+
+	if !ok {
+		t.Errorf("il is not ast.IntegerLiteral, got: %T", il)
+		return false
+	}
+
+	if integer.Value != val {
+		t.Errorf("Value not equal to %d, Got: %d", val, integer.Value)
+		return false
+	}
+
+	if integer.TokenLiteral() != fmt.Sprintf("%d", val) {
+		t.Errorf("integer.TokenLiteral not equal to %d, Got: %s", val, integer.TokenLiteral())
+		return false
+	}
+
+	return true
+}
+
 func checkParserErrors(t *testing.T, p *Parser) {
 	errors := p.errors
 	fmt.Printf("")
