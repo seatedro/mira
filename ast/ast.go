@@ -157,7 +157,7 @@ func (infix *InfixExpression) String() string {
 
 	out.WriteString("(")
 	out.WriteString(infix.Left.String())
-	out.WriteString(infix.Operator)
+	out.WriteString(" " + infix.Operator + " ")
 	out.WriteString(infix.Right.String())
 	out.WriteString(")")
 
