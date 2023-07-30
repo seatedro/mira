@@ -25,6 +25,8 @@ const (
 	BANG     = "!"
 	LT       = "<"
 	GT       = ">"
+	LE       = "<="
+	GE       = ">="
 	EQ       = "=="
 	NEQ      = "!="
 	DEC      = "--"
