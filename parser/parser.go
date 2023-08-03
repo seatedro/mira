@@ -80,6 +80,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.prefixParsers[token.MINUS] = p.parsePrefixExpression
 	p.prefixParsers[token.DEC] = p.parsePrefixExpression
 	p.prefixParsers[token.INC] = p.parsePrefixExpression
+	p.prefixParsers[token.TRUE] = p.parseBoolean
+	p.prefixParsers[token.FALSE] = p.parseBoolean
 
 	// Eg: let x = 5;
 	// Calling twice because initially currToken = nil, nextToken = let.
@@ -105,6 +107,10 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
+}
+
+func (p *Parser) parseBoolean() ast.Expression {
+	return &ast.Bool{Token: p.currToken, Value: p.curTokenIs(token.TRUE)}
 }
 
 func (p *Parser) parseIntegerLiteral() ast.Expression {
