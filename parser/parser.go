@@ -83,6 +83,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.prefixParsers[token.TRUE] = p.parseBoolean
 	p.prefixParsers[token.FALSE] = p.parseBoolean
 	p.prefixParsers[token.LPAREN] = p.parseGroupedExpression
+	p.prefixParsers[token.IF] = p.parseIfExpression
 
 	// Eg: let x = 5;
 	// Calling twice because initially currToken = nil, nextToken = let.
@@ -164,6 +165,31 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 	return exp
 }
 
+func (p *Parser) parseIfExpression() ast.Expression {
+	exp := &ast.IfExpression{Token: p.currToken}
+
+	p.nextToken()
+	exp.Condition = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	exp.Then = p.parseBlockStatement()
+
+	if p.peekTokenIs(token.ELSE) {
+		p.nextToken()
+
+		if !p.expectPeek(token.LBRACE) {
+			return nil
+		}
+
+		exp.Else = p.parseBlockStatement()
+	}
+
+	return exp
+}
+
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.currToken.Type {
 	case token.LET:
@@ -173,6 +199,23 @@ func (p *Parser) parseStatement() ast.Statement {
 	default:
 		return p.parseExpressionStatement()
 	}
+}
+
+func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	block := &ast.BlockStatement{Token: p.currToken}
+	block.Statements = []ast.Statement{}
+
+	p.nextToken()
+
+	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
+		stmnt := p.parseStatement()
+		if stmnt != nil {
+			block.Statements = append(block.Statements, stmnt)
+		}
+		p.nextToken()
+	}
+
+	return block
 }
 
 func (p *Parser) parseExpressionStatement() ast.Statement {

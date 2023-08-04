@@ -60,6 +60,11 @@ type ReturnStatement struct {
 	ReturnValue Expression
 }
 
+type BlockStatement struct {
+	Token      token.Token
+	Statements []Statement
+}
+
 type Identifier struct {
 	Token token.Token
 	Value string
@@ -86,6 +91,13 @@ type InfixExpression struct {
 type Bool struct {
 	Token token.Token
 	Value bool
+}
+
+type IfExpression struct {
+	Token     token.Token
+	Condition Expression
+	Then      *BlockStatement
+	Else      *BlockStatement
 }
 
 func (es *ExpressionStatement) statementNode()       {}
@@ -132,6 +144,18 @@ func (rs *ReturnStatement) String() string {
 	return out.String()
 }
 
+func (bs *BlockStatement) statementNode()       {}
+func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
+func (bs *BlockStatement) String() string {
+	var out bytes.Buffer
+
+	for _, s := range bs.Statements {
+		out.WriteString(s.String())
+	}
+
+	return out.String()
+}
+
 func (i *Identifier) expressionNode()      {}
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 func (i *Identifier) String() string {
@@ -172,3 +196,21 @@ func (infix *InfixExpression) String() string {
 func (b *Bool) expressionNode()      {}
 func (b *Bool) TokenLiteral() string { return b.Token.Literal }
 func (b *Bool) String() string       { return b.Token.Literal }
+
+func (ifExp *IfExpression) expressionNode()      {}
+func (ifExp *IfExpression) TokenLiteral() string { return ifExp.Token.Literal }
+func (ifExp *IfExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("if")
+	out.WriteString(ifExp.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(ifExp.Then.String())
+
+	if ifExp.Else != nil {
+		out.WriteString("else ")
+		out.WriteString(ifExp.Else.String())
+	}
+
+	return out.String()
+}
