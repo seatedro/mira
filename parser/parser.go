@@ -82,6 +82,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.prefixParsers[token.INC] = p.parsePrefixExpression
 	p.prefixParsers[token.TRUE] = p.parseBoolean
 	p.prefixParsers[token.FALSE] = p.parseBoolean
+	p.prefixParsers[token.LPAREN] = p.parseGroupedExpression
 
 	// Eg: let x = 5;
 	// Calling twice because initially currToken = nil, nextToken = let.
@@ -147,6 +148,18 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	p.nextToken()
 
 	exp.Right = p.parseExpression(precedence)
+
+	return exp
+}
+
+func (p *Parser) parseGroupedExpression() ast.Expression {
+	p.nextToken()
+
+	exp := p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
 
 	return exp
 }
