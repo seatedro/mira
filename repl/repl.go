@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"io"
 	"mira/lexer"
-	"mira/token"
+	"mira/parser"
 )
 
 const PROMPT = "> "
@@ -24,9 +24,21 @@ func Start(in io.Reader, out io.Writer) {
 
 		line := scanner.Text()
 		lex := lexer.New(line)
+		parser := parser.New(lex)
+		program := parser.ParseProgram()
 
-		for tok := lex.NextToken(); tok.Type != token.EOF; tok = lex.NextToken() {
-			fmt.Fprintf(out, "%+v\n", tok)
+		if len(parser.Errors()) != 0 {
+			printParserErrors(out, parser.Errors())
+			continue
 		}
+
+		io.WriteString(out, program.String())
+		io.WriteString(out, "\n")
+	}
+}
+
+func printParserErrors(out io.Writer, errors []string) {
+	for _, err := range errors {
+		io.WriteString(out, "\t"+err+"\n")
 	}
 }
