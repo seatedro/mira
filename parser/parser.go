@@ -84,6 +84,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.prefixParsers[token.FALSE] = p.parseBoolean
 	p.prefixParsers[token.LPAREN] = p.parseGroupedExpression
 	p.prefixParsers[token.IF] = p.parseIfExpression
+	p.prefixParsers[token.FUNCTION] = p.parseFunctionLiteral
 
 	// Eg: let x = 5;
 	// Calling twice because initially currToken = nil, nextToken = let.
@@ -130,6 +131,24 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	literal.Value = value
 
 	return literal
+}
+
+func (p *Parser) parseFunctionLiteral() ast.Expression {
+	fn := &ast.FunctionLiteral{Token: p.currToken}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	fn.Parameters = p.parseFunctionParams()
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	fn.Body = p.parseBlockStatement()
+
+	return fn
 }
 
 func (p *Parser) parsePrefixExpression() ast.Expression {
@@ -188,6 +207,35 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	}
 
 	return exp
+}
+
+func (p *Parser) parseFunctionParams() []*ast.Identifier {
+	idents := []*ast.Identifier{}
+
+	if p.peekTokenIs(token.RPAREN) {
+		p.nextToken()
+		return idents
+	}
+
+	p.nextToken()
+
+	// We do this here in case there is only one param
+	ident := &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
+	idents = append(idents, ident)
+
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		// currToken = next param
+		ident := &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
+		idents = append(idents, ident)
+	}
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return idents
 }
 
 func (p *Parser) parseStatement() ast.Statement {
