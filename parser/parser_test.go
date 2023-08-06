@@ -346,6 +346,10 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 			"add(a + b + c * d / f + g)",
 			"add((((a + b) + ((c * d) / f)) + g))",
 		},
+		{
+			"fn(x, y, z) { x + y - z;}(1, 2, 3);",
+			"fn (x, y, z) ((x + y) - z)(1, 2, 3)",
+		},
 	}
 
 	for _, tt := range tests {
