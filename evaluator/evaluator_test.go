@@ -184,3 +184,59 @@ if (10 > 1) {
 		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
+
+func TestErrorHandling(t *testing.T) {
+	tests := []struct {
+		input           string
+		expectedMessage string
+	}{
+		{
+			"5 + true;",
+			"type mismatch: INTEGER + BOOL",
+		},
+		{
+			"5 + true; 5;",
+			"type mismatch: INTEGER + BOOL",
+		},
+		{
+			"-true",
+			"unknown operator: -BOOL",
+		},
+		{
+			"true + false;",
+			"unknown operator: BOOL + BOOL",
+		},
+		{
+			"5; true + false; 5",
+			"unknown operator: BOOL + BOOL",
+		},
+		{
+			"if (10 > 1) { true + false; }",
+			"unknown operator: BOOL + BOOL",
+		},
+		{
+			`
+if (10 > 1) {
+  if (10 > 1) {
+    return true + false;
+  }
+}
+      `,
+			"unknown operator: BOOL + BOOL",
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		errObj, ok := evaluated.(*object.Error)
+		if !ok {
+			t.Errorf("no error object returned, got=%T(%+v)", evaluated, evaluated)
+			continue
+		}
+
+		if errObj.Message != tt.expectedMessage {
+			t.Errorf("wrong error message, got=%q, want=%q", errObj.Message, tt.expectedMessage)
+		}
+	}
+}
