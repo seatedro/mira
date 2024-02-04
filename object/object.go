@@ -6,6 +6,7 @@ const (
 	INTEGER_TYPE = "INTEGER"
 	BOOL_TYPE    = "BOOL"
 	NULL_TYPE    = "NULL"
+	RETURN_VALUE = "RETURN_VALUE"
 )
 
 type ObjectType string
@@ -47,4 +48,16 @@ func (i *Null) Inspect() string {
 
 func (i *Null) Type() ObjectType {
 	return NULL_TYPE
+}
+
+type ReturnValue struct {
+	Value Object
+}
+
+func (rv *ReturnValue) Type() ObjectType {
+	return RETURN_VALUE
+}
+
+func (rv *ReturnValue) Inspect() string {
+	return rv.Value.Inspect()
 }
