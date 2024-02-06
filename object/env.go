@@ -2,6 +2,13 @@ package object
 
 type Env struct {
 	store map[string]Object
+	outer *Env
+}
+
+func NewEnclosedEnv(outer *Env) *Env {
+	env := NewEnv()
+	env.outer = outer
+	return env
 }
 
 func NewEnv() *Env {
@@ -11,6 +18,9 @@ func NewEnv() *Env {
 
 func (e *Env) Get(name string) (Object, bool) {
 	obj, ok := e.store[name]
+	if !ok && e.outer != nil {
+		obj, ok = e.outer.Get(name)
+	}
 	return obj, ok
 }
 
