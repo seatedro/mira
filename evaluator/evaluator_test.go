@@ -106,6 +106,20 @@ func testBoolObject(t *testing.T, obj object.Object, expected bool) bool {
 	return true
 }
 
+func TestStringLiteral(t *testing.T) {
+	input := `"hello world"`
+
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("object is not String. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if str.Value != "hello world" {
+		t.Errorf("String has wrong value. got=%q", str.Value)
+	}
+}
+
 func TestBangOperator(t *testing.T) {
 	tests := []struct {
 		input    string

@@ -120,7 +120,10 @@ func TestIdentifierExpression(t *testing.T) {
 	stmnt, ok := program.Statements[0].(*ast.ExpressionStatement)
 
 	if !ok {
-		t.Fatalf("Program.Statements[0] is not an ast.ExpressionStatement. Got: %T", program.Statements[0])
+		t.Fatalf(
+			"Program.Statements[0] is not an ast.ExpressionStatement. Got: %T",
+			program.Statements[0],
+		)
 	}
 
 	ident, ok := stmnt.Expression.(*ast.Identifier)
@@ -153,7 +156,10 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	stmnt, ok := program.Statements[0].(*ast.ExpressionStatement)
 
 	if !ok {
-		t.Fatalf("Program.Statements[0] is not an ast.ExpressionStatement. Got: %T", program.Statements[0])
+		t.Fatalf(
+			"Program.Statements[0] is not an ast.ExpressionStatement. Got: %T",
+			program.Statements[0],
+		)
 	}
 
 	integer, ok := stmnt.Expression.(*ast.IntegerLiteral)
@@ -168,6 +174,25 @@ func TestIntegerLiteralExpression(t *testing.T) {
 
 	if integer.TokenLiteral() != "5" {
 		t.Errorf("integer.TokenLiteral() not %s. got=%s", "5", integer.TokenLiteral())
+	}
+}
+
+func TestStringLiteralExpression(t *testing.T) {
+	input := `"hello world";`
+
+	lexer := lexer.New(input)
+	parser := New(lexer)
+	program := parser.ParseProgram()
+	checkParserErrors(t, parser)
+
+	stmnt := program.Statements[0].(*ast.ExpressionStatement)
+	literal, ok := stmnt.Expression.(*ast.StringLiteral)
+	if !ok {
+		t.Errorf("exp not *ast.StringLiteral. got=%T", stmnt.Expression)
+	}
+
+	if literal.Value != "hello world" {
+		t.Errorf("literal.Value not %s. got=%s", "hello world", literal.Value)
 	}
 }
 
@@ -207,6 +232,7 @@ func TestBooleanExpression(t *testing.T) {
 		}
 	}
 }
+
 func TestPrefixOperatorExpression(t *testing.T) {
 	prefixTests := []struct {
 		input        string
@@ -232,7 +258,10 @@ func TestPrefixOperatorExpression(t *testing.T) {
 		stmnt, ok := program.Statements[0].(*ast.ExpressionStatement)
 
 		if !ok {
-			t.Fatalf("Program.Statements[0] is not an ast.ExpressionStatement. Got: %T", program.Statements[0])
+			t.Fatalf(
+				"Program.Statements[0] is not an ast.ExpressionStatement. Got: %T",
+				program.Statements[0],
+			)
 		}
 
 		exp, ok := stmnt.Expression.(*ast.PrefixExpression)
@@ -719,7 +748,13 @@ func testLiteralExp(t *testing.T, exp ast.Expression, expected interface{}) bool
 	return false
 }
 
-func testInfixExpression(t *testing.T, exp ast.Expression, left interface{}, operator string, right interface{}) bool {
+func testInfixExpression(
+	t *testing.T,
+	exp ast.Expression,
+	left interface{},
+	operator string,
+	right interface{},
+) bool {
 	opExp, ok := exp.(*ast.InfixExpression)
 
 	if !ok {

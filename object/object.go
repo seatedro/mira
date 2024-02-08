@@ -14,6 +14,7 @@ const (
 	RETURN_VALUE  = "RETURN_VALUE"
 	ERROR_TYPE    = "ERROR"
 	FUNCTION_TYPE = "FUNCTION"
+	STRING_TYPE   = "STRING"
 )
 
 type ObjectType string
@@ -34,8 +35,15 @@ type Bool struct {
 	Value bool
 }
 
-func (i *Bool) Inspect() string  { return fmt.Sprintf("%t", i.Value) }
-func (i *Bool) Type() ObjectType { return BOOL_TYPE }
+func (b *Bool) Inspect() string  { return fmt.Sprintf("%t", b.Value) }
+func (b *Bool) Type() ObjectType { return BOOL_TYPE }
+
+type String struct {
+	Value string
+}
+
+func (s *String) Inspect() string  { return s.Value }
+func (s *String) Type() ObjectType { return STRING_TYPE }
 
 type Null struct{}
 

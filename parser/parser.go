@@ -37,14 +37,12 @@ var precedences = map[token.TokenType]int{
 }
 
 type Parser struct {
-	l *lexer.Lexer
-
-	currToken token.Token
-	peekToken token.Token
-	errors    []string
-
+	l             *lexer.Lexer
 	prefixParsers map[token.TokenType]prefixParseFn
 	infixParsers  map[token.TokenType]infixParseFn
+	currToken     token.Token
+	peekToken     token.Token
+	errors        []string
 }
 
 type (
@@ -87,6 +85,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.prefixParsers[token.LPAREN] = p.parseGroupedExpression
 	p.prefixParsers[token.IF] = p.parseIfExpression
 	p.prefixParsers[token.FUNCTION] = p.parseFunctionLiteral
+	p.prefixParsers[token.STRING] = p.parseStringLiteral
 
 	// Eg: let x = 5;
 	// Calling twice because initially currToken = nil, nextToken = let.
@@ -122,7 +121,6 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	literal := &ast.IntegerLiteral{Token: p.currToken}
 
 	value, err := strconv.ParseInt(p.currToken.Literal, 0, 64)
-
 	if err != nil {
 		errMsg := fmt.Sprintf("Could not parse %s as integer", p.currToken.Literal)
 		p.errors = append(p.errors, errMsg)
@@ -133,6 +131,10 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	literal.Value = value
 
 	return literal
+}
+
+func (p *Parser) parseStringLiteral() ast.Expression {
+	return &ast.StringLiteral{Token: p.currToken, Value: p.currToken.Literal}
 }
 
 func (p *Parser) parseFunctionLiteral() ast.Expression {
