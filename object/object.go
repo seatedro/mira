@@ -16,6 +16,7 @@ const (
 	FUNCTION_TYPE = "FUNCTION"
 	STRING_TYPE   = "STRING"
 	BUILTIN_TYPE  = "BUILTIN"
+	ARRAY_TYPE    = "ARRAY"
 )
 
 type ObjectType string
@@ -99,3 +100,23 @@ type (
 
 func (b *Builtin) Type() ObjectType { return BUILTIN_TYPE }
 func (b *Builtin) Inspect() string  { return "builtin function" }
+
+type Array struct {
+	Elements []Object
+}
+
+func (a *Array) Type() ObjectType { return ARRAY_TYPE }
+func (a *Array) Inspect() string {
+	var out bytes.Buffer
+
+	elements := []string{}
+	for _, el := range a.Elements {
+		elements = append(elements, el.Inspect())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}

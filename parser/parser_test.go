@@ -233,6 +233,71 @@ func TestBooleanExpression(t *testing.T) {
 	}
 }
 
+func TestParsingArrayLiterals(t *testing.T) {
+	input := "[1, 2, 3 * 2, 4 / 2, 5 * 5];"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmnt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf(
+			"program.Statements[0] is not an ast.ExpressionStatement. got=%T",
+			program.Statements[0],
+		)
+	}
+
+	array, ok := stmnt.Expression.(*ast.ArrayLiteral)
+	if !ok {
+		t.Fatalf("exp not *ast.ArrayLiteral. got=%T", stmnt.Expression)
+	}
+
+	if len(array.Elements) != 5 {
+		t.Fatalf("len(array.Elements) not 5. got=%d", len(array.Elements))
+	}
+
+	testIntegerLiteral(t, array.Elements[0], 1)
+	testIntegerLiteral(t, array.Elements[1], 2)
+	testInfixExpression(t, array.Elements[2], 3, "*", 2)
+	testInfixExpression(t, array.Elements[3], 4, "/", 2)
+	testInfixExpression(t, array.Elements[4], 5, "*", 5)
+}
+
+func TestParsingIndexExpressions(t *testing.T) {
+	input := "array[1 + 2]"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmnt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf(
+			"program.Statements[0] is not an ast.ExpressionStatement. got=%T",
+			program.Statements[0],
+		)
+	}
+
+	indexExp, ok := stmnt.Expression.(*ast.IndexExpression)
+	if !ok {
+		t.Fatalf(
+			"exp not *ast.IndexExpression. got=%T",
+			stmnt.Expression,
+		)
+	}
+
+	if !testIdentifier(t, indexExp.Left, "array") {
+		return
+	}
+
+	if !testInfixExpression(t, indexExp.Index, 1, "+", 2) {
+		return
+	}
+}
+
 func TestPrefixOperatorExpression(t *testing.T) {
 	prefixTests := []struct {
 		input        string
@@ -384,6 +449,14 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 		{
 			"fn(x, y, z) { x + y - z;}(1, 2, 3);",
 			"fn (x, y, z) ((x + y) - z)(1, 2, 3)",
+		},
+		{
+			"a * [1, 2, 3, 4][b * c] * d",
+			"((a * ([1, 2, 3, 4][(b * c)])) * d)",
+		},
+		{
+			"add(a * b[2], b[1], 2 * [1, 2][1])",
+			"add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))",
 		},
 	}
 
