@@ -1,6 +1,9 @@
 package evaluator
 
-import "mira/object"
+import (
+	"fmt"
+	"mira/object"
+)
 
 var builtins = map[string]*object.Builtin{
 	"len": {
@@ -90,6 +93,16 @@ var builtins = map[string]*object.Builtin{
 			newElems[length] = args[1]
 
 			return &object.Array{Elements: newElems}
+		},
+	},
+	"print": {
+		Fn: func(args ...object.Object) object.Object {
+			for _, arg := range args {
+				fmt.Print(arg.Inspect())
+				fmt.Print(" ")
+			}
+
+			return NULL
 		},
 	},
 }
