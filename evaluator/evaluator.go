@@ -21,6 +21,9 @@ func Eval(node ast.Node, env *object.Env) object.Object {
 		body := node.Body
 		return &object.Function{Parameters: params, Body: body, Env: env}
 	case *ast.CallExpression:
+		if node.Function.String() == "quote" {
+			return quote(node.Arguments[0], env)
+		}
 		fn := Eval(node.Function, env)
 		if isError(fn) {
 			return fn

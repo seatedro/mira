@@ -19,6 +19,9 @@ const (
 	BUILTIN_TYPE  = "BUILTIN"
 	ARRAY_TYPE    = "ARRAY"
 	HASH_TYPE     = "HASH"
+
+	// Macro
+	QUOTE_TYPE = "QUOTE"
 )
 
 type ObjectType string
@@ -178,4 +181,13 @@ func (h *Hash) Inspect() string {
 
 type Hashable interface {
 	HashKey() HashKey
+}
+
+type Quote struct {
+	Node ast.Node
+}
+
+func (q *Quote) Type() ObjectType { return QUOTE_TYPE }
+func (q *Quote) Inspect() string {
+	return "QUOTE(" + q.Node.String() + ")"
 }
