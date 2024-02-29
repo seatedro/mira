@@ -22,6 +22,7 @@ const (
 
 	// Macro
 	QUOTE_TYPE = "QUOTE"
+	MACRO_TYPE = "MACRO"
 )
 
 type ObjectType string
@@ -190,4 +191,29 @@ type Quote struct {
 func (q *Quote) Type() ObjectType { return QUOTE_TYPE }
 func (q *Quote) Inspect() string {
 	return "QUOTE(" + q.Node.String() + ")"
+}
+
+type Macro struct {
+	Body       *ast.BlockStatement
+	Env        *Env
+	Parameters []*ast.Identifier
+}
+
+func (m *Macro) Type() ObjectType { return MACRO_TYPE }
+func (m *Macro) Inspect() string {
+	var out bytes.Buffer
+
+	params := []string{}
+	for _, p := range m.Parameters {
+		params = append(params, p.String())
+	}
+
+	out.WriteString("macro")
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") {\n")
+	out.WriteString(m.Body.String())
+	out.WriteString("\n}")
+
+	return out.String()
 }

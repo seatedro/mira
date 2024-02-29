@@ -46,19 +46,19 @@ func (p *Program) String() string {
 }
 
 type ExpressionStatement struct {
-	Token      token.Token
 	Expression Expression
+	Token      token.Token
 }
 
 type LetStatement struct {
-	Token token.Token
-	Name  *Identifier
 	Value Expression
+	Name  *Identifier
+	Token token.Token
 }
 
 type ReturnStatement struct {
-	Token       token.Token
 	ReturnValue Expression
+	Token       token.Token
 }
 
 type BlockStatement struct {
@@ -87,28 +87,28 @@ type ArrayLiteral struct {
 }
 
 type FunctionLiteral struct {
+	Body       *BlockStatement
 	Token      token.Token
 	Parameters []*Identifier
-	Body       *BlockStatement
 }
 
 type PrefixExpression struct {
+	Right    Expression
 	Token    token.Token
 	Operator string
-	Right    Expression
 }
 
 type InfixExpression struct {
-	Token    token.Token
-	Operator string
 	Left     Expression
 	Right    Expression
+	Token    token.Token
+	Operator string
 }
 
 type IndexExpression struct {
-	Token token.Token
 	Left  Expression
 	Index Expression
+	Token token.Token
 }
 
 type Bool struct {
@@ -117,10 +117,10 @@ type Bool struct {
 }
 
 type IfExpression struct {
-	Token     token.Token
 	Condition Expression
 	Then      *BlockStatement
 	Else      *BlockStatement
+	Token     token.Token
 }
 
 type CallExpression struct {
@@ -333,6 +333,31 @@ func (h *HashLiteral) String() string {
 	out.WriteString("{")
 	out.WriteString(strings.Join(pairs, ", "))
 	out.WriteString("}")
+
+	return out.String()
+}
+
+type MacroLiteral struct {
+	Body       *BlockStatement
+	Token      token.Token
+	Parameters []*Identifier
+}
+
+func (ml *MacroLiteral) expressionNode()      {}
+func (ml *MacroLiteral) TokenLiteral() string { return ml.Token.Literal }
+func (ml *MacroLiteral) String() string {
+	var out bytes.Buffer
+
+	params := []string{}
+	for _, p := range ml.Parameters {
+		params = append(params, p.String())
+	}
+
+	out.WriteString(ml.TokenLiteral())
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") ")
+	out.WriteString(ml.Body.String())
 
 	return out.String()
 }

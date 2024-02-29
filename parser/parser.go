@@ -91,6 +91,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.prefixParsers[token.STRING] = p.parseStringLiteral
 	p.prefixParsers[token.LBRACKET] = p.parseArrayLiteral
 	p.prefixParsers[token.LBRACE] = p.parseHashLiteral
+	p.prefixParsers[token.MACRO] = p.parseMacroLiteral
 
 	// Eg: let x = 5;
 	// Calling twice because initially currToken = nil, nextToken = let.
@@ -222,6 +223,24 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 	fn.Body = p.parseBlockStatement()
 
 	return fn
+}
+
+func (p *Parser) parseMacroLiteral() ast.Expression {
+	macro := &ast.MacroLiteral{Token: p.currToken}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	macro.Parameters = p.parseFunctionParams()
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	macro.Body = p.parseBlockStatement()
+
+	return macro
 }
 
 func (p *Parser) parsePrefixExpression() ast.Expression {
