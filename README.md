@@ -1,9 +1,7 @@
-
-
 # Mirame
 
 Mirame is an interpreted programming language written in Go. It is designed to follow the principles outlined in Thorsten Ball's book "Writing an Interpreter in Go" and serves as a practical example of how to write an interpreter from scratch using Go.
-Mira is the repository that holds the interpreter code written in Go. [Mirame](https://github.com/rohitp934/mirame) Is the repository for the interpreter written in Rust.
+Mira is the repository that holds the interpreter code written in Go. [Mirame](https://github.com/seatedro/mirame) Is the repository for the interpreter written in Rust.
 
 ## Getting Started
 
@@ -16,8 +14,9 @@ Mira is the repository that holds the interpreter code written in Go. [Mirame](h
 To install Mira, clone this repository into your local machine:
 
 ```
-git clone git@github.com:rohitp934/mira.git
+git clone git@github.com:seatedro/mira.git
 ```
+
 (If you're not using SSH, use it)
 
 ### Running
